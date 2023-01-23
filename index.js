@@ -85,6 +85,6 @@ async function main() {
 }
 
 sendMessageToSlack("serverStart");
-cron.schedule("0 51 10 * * *", async () => {
+cron.schedule("0 0 8 * * *", async () => {
   await main();
 });
