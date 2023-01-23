@@ -55,7 +55,7 @@ async function main() {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
@@ -84,7 +84,7 @@ async function main() {
   }
 }
 
-console.log("serverStart");
-cron.schedule("0 12 20 * * *", async () => {
+sendMessageToSlack("serverStart");
+cron.schedule("0 51 10 * * *", async () => {
   await main();
 });
