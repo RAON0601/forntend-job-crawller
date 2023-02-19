@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@slack/web-api": "^6.8.0",
-    "aws-sdk": "^2.1295.0",
+    "aws-sdk": "^2.1313.0",
     "google-spreadsheet": "^3.3.0",
     "node-cron": "^3.0.2",
     "puppeteer": "^19.5.2"

@@ -3,15 +3,14 @@ const cron = require("node-cron");
 const puppeteer = require("puppeteer");
 const { sendMessageToSlack } = require("./slackbot");
 const { uploadFileToS3 } = require("./s3");
-/**
- * @returns DOM의 text 데이터를 반환한다
- */
+
 function extractItems() {
-  // 여기 결과 DOM임 그대로 쓰면됨
+  // 브라우저에서 동작하는 코드들
   const extractedElements = document.querySelectorAll(
     "ul[data-cy='job-list'] li"
   );
 
+  // 여기 코드는 직접 DOM을 해석하여 셀렉터를 사용해야 한다.
   const items = [];
   for (const element of extractedElements) {
     const link = element.querySelector("a").href;
@@ -22,9 +21,6 @@ function extractItems() {
   return items;
 }
 
-/**
- * @returns DOM의 text 데이터를 반환한다
- */
 async function scrapeItems(page, extractItems, scrollDelay = 2000) {
   let previousHeight;
   let curRetryCount = 0;
@@ -36,9 +32,9 @@ async function scrapeItems(page, extractItems, scrollDelay = 2000) {
     await page.evaluate("window.scrollTo(0, document.body.scrollHeight)");
     // 데이터 로드 기다리기
     await page.waitForTimeout(scrollDelay);
-
+    // 페이지를 끝으로 이동 시킨다.
     const currentHeight = await page.evaluate(() => document.body.scrollHeight);
-
+    // 이전 페이지와 현재 페이지가 같다면 끝인가?
     if (currentHeight <= previousHeight) {
       console.log(`Retry Count:${curRetryCount}`);
       curRetryCount++;
@@ -56,11 +52,14 @@ async function main() {
   try {
     const browser = await puppeteer.launch({
       headless: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // chrome 보안 관련 설정 잘 몰르겠음
     });
 
+    // 브라우저를 연다
     const page = await browser.newPage();
+    // URL 이동
     await page.goto(URL);
+    // 채용공고 수집
     const infos = await scrapeItems(page, extractItems);
     const filteredInfos = infos
       .map((info) => ({ ...info, position: info.position?.toLowerCase() }))
@@ -85,6 +84,11 @@ async function main() {
 }
 
 sendMessageToSlack("serverStart");
-cron.schedule("0 0 8 * * *", async () => {
+const startServer = async () => {
   await main();
-});
+};
+
+startServer();
+// cron.schedule("0 0 8 * * *", async () => {
+//   await main();
+// });
